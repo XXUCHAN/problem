@@ -100,7 +100,8 @@ class Game {
 			console.log('Done!!');
 			console.log('남은 지뢰 : ', this.mine_count);
 			console.table(this.map);
-			console.log(duration);
+			const time = msToMinutesSeconds(duration);
+			console.log(`${time.minutes}분, ${time.seconds}초`);
 			console.log('다시 시작하기겠습니까? (y/n) : ');
 			io().then((input) => {
 				if (input[0] === 'y') {
@@ -141,7 +142,8 @@ class Game {
 					console.table(this.map);
 					console.table(this.result_map);
 					const duration = performance.now() - startTime;
-					console.log(duration);
+					const time = msToMinutesSeconds(duration);
+					console.log(`${time.minutes}분, ${time.seconds}초`);
 					console.log('다시 시작하기겠습니까? (y/n) : ');
 				} else {
 					if (this.map[y][x] !== 'f') {
@@ -228,5 +230,14 @@ function getMineCoord(x: number, y: number, mine_count: number): Mine[] {
 	return Array.from(mine_set);
 }
 
+function msToMinutesSeconds(ms: number) {
+	const totalSeconds = Math.floor(ms / 1000);
+	const minutes = Math.floor(totalSeconds / 60);
+	const seconds = totalSeconds % 60;
+	return {
+		minutes: minutes,
+		seconds: seconds,
+	};
+}
 let startTime = performance.now();
 init();
