@@ -101,11 +101,18 @@ class Game {
 			console.log('남은 지뢰 : ', this.mine_count);
 			console.table(this.map);
 			console.log(duration);
-			process.exit();
+			console.log('다시 시작하기겠습니까? (y/n) : ');
+			io().then((input) => {
+				if (input[0] === 'y') {
+					return gameStart([], this.level);
+				} else if (input[0] === 'n') {
+					return init();
+				}
+			});
 		}
 		io().then((input) => {
-			if (input[0] === 'r') return gameStart([], this.level);
-			else if (input[0] === 'q') return init();
+			if (input[0] === 'r' || input[0] === 'y') return gameStart([], this.level);
+			else if (input[0] === 'q' || input[0] === 'n') return init();
 			else if (input[0] === 'f') {
 				console.log('flag', input);
 				const x = Number(input[1]);
@@ -135,7 +142,7 @@ class Game {
 					console.table(this.result_map);
 					const duration = performance.now() - startTime;
 					console.log(duration);
-					process.exit();
+					console.log('다시 시작하기겠습니까? (y/n) : ');
 				} else {
 					if (this.map[y][x] !== 'f') {
 						const areaCnt = this.searchSquare(x, y);
@@ -174,6 +181,7 @@ function io(): Promise<string[]> {
 }
 
 function init() {
+	startTime = performance.now();
 	console.log('난이도를 선택하세요 (easy, normal, hard) : ');
 	io().then((input) => {
 		if (input[0] !== 'easy' && input[0] !== 'normal' && input[0] !== 'hard') {
@@ -184,6 +192,7 @@ function init() {
 	});
 }
 function gameStart(input: string[], level?: string) {
+	startTime = performance.now();
 	if (level) {
 		input[0] = level;
 	}
@@ -219,5 +228,5 @@ function getMineCoord(x: number, y: number, mine_count: number): Mine[] {
 	return Array.from(mine_set);
 }
 
-const startTime = performance.now();
+let startTime = performance.now();
 init();

@@ -96,12 +96,20 @@ class Game {
             console.log('남은 지뢰 : ', this.mine_count);
             console.table(this.map);
             console.log(duration);
-            process.exit();
+            console.log('다시 시작하기겠습니까? (y/n) : ');
+            io().then((input) => {
+                if (input[0] === 'y') {
+                    return gameStart([], this.level);
+                }
+                else if (input[0] === 'n') {
+                    return init();
+                }
+            });
         }
         io().then((input) => {
-            if (input[0] === 'r')
+            if (input[0] === 'r' || input[0] === 'y')
                 return gameStart([], this.level);
-            else if (input[0] === 'q')
+            else if (input[0] === 'q' || input[0] === 'n')
                 return init();
             else if (input[0] === 'f') {
                 console.log('flag', input);
@@ -135,7 +143,7 @@ class Game {
                     console.table(this.result_map);
                     const duration = perf_hooks_1.performance.now() - startTime;
                     console.log(duration);
-                    process.exit();
+                    console.log('다시 시작하기겠습니까? (y/n) : ');
                 }
                 else {
                     if (this.map[y][x] !== 'f') {
@@ -174,6 +182,7 @@ function io() {
     });
 }
 function init() {
+    startTime = perf_hooks_1.performance.now();
     console.log('난이도를 선택하세요 (easy, normal, hard) : ');
     io().then((input) => {
         if (input[0] !== 'easy' && input[0] !== 'normal' && input[0] !== 'hard') {
@@ -184,6 +193,7 @@ function init() {
     });
 }
 function gameStart(input, level) {
+    startTime = perf_hooks_1.performance.now();
     if (level) {
         input[0] = level;
     }
@@ -218,5 +228,5 @@ function getMineCoord(x, y, mine_count) {
     console.log(mine_set);
     return Array.from(mine_set);
 }
-const startTime = perf_hooks_1.performance.now();
+let startTime = perf_hooks_1.performance.now();
 init();
