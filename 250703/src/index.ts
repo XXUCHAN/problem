@@ -79,14 +79,6 @@ class Game {
 		}
 		return cnt.toString();
 	}
-	mineChecker(x: number, y: number) {
-		for (const m of this.mine) {
-			if (m.x === x && m.y === y) {
-				return true;
-			}
-		}
-		return false;
-	}
 	flagChecker(x: number, y: number) {
 		if (this.result_map[y][x] === '@') {
 			return true;
