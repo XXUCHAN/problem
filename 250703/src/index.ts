@@ -5,22 +5,24 @@ class Game {
 	public mine: Mine[] = [];
 	public mine_count: number;
 	public map: string[][] = [];
-	public map_size: number;
+	public map_x: number;
+	public map_y: number;
 	public level: string;
 	public flag_count: number;
 	public result_map: string[][] = [];
 	constructor(levelData: Level) {
-		this.mine_count = rand(1, levelData.max_mine);
-		this.map_size = levelData.size;
-		this.mine = getMineCoord(this.map_size, this.mine_count);
+		this.mine_count = levelData.max_mine;
+		this.map_x = levelData.size_x;
+		this.map_y = levelData.size_y;
+		this.mine = getMineCoord(this.map_x, this.map_y, this.mine_count);
 		this.level = levelData.level;
 		this.flag_count = 0;
 	}
 	initMap() {
-		for (let i = 0; i < this.map_size; i++) {
+		for (let i = 0; i < this.map_y; i++) {
 			this.map[i] = [];
 			this.result_map[i] = [];
-			for (let j = 0; j < this.map_size; j++) {
+			for (let j = 0; j < this.map_x; j++) {
 				this.map[i][j] = '#';
 				this.result_map[i][j] = '#';
 			}
@@ -30,9 +32,7 @@ class Game {
 		}
 	}
 	travelArea(x: number, y: number) {
-		const visited = new Array(this.map_size)
-			.fill(0)
-			.map(() => new Array(this.map_size).fill(false));
+		const visited = new Array(this.map_y).fill(0).map(() => new Array(this.map_x).fill(false));
 		const queue: { x: number; y: number }[] = [];
 		queue.push({ x, y });
 		visited[y][x] = true;
@@ -47,7 +47,7 @@ class Game {
 				for (const dy of delta_y) {
 					const new_x = x + dx;
 					const new_y = y + dy;
-					if (new_x >= 0 && new_x < this.map_size && new_y >= 0 && new_y < this.map_size) {
+					if (new_x >= 0 && new_x < this.map_x && new_y >= 0 && new_y < this.map_y) {
 						if (!visited[new_y][new_x]) {
 							visited[new_y][new_x] = true;
 							const areaCnt = this.searchSquare(new_x, new_y);
@@ -70,7 +70,7 @@ class Game {
 			for (const dy of delta_y) {
 				const new_x = x + dx;
 				const new_y = y + dy;
-				if (new_x >= 0 && new_x < this.map_size && new_y >= 0 && new_y < this.map_size) {
+				if (new_x >= 0 && new_x < this.map_x && new_y >= 0 && new_y < this.map_y) {
 					if (this.flagChecker(new_x, new_y)) {
 						cnt++;
 					}
@@ -99,7 +99,7 @@ class Game {
 			console.clear();
 			console.log('Done!!');
 			console.log('남은 지뢰 : ', this.mine_count);
-			console.log(this.map);
+			console.table(this.map);
 			console.log(duration);
 			process.exit();
 		}
@@ -120,7 +120,7 @@ class Game {
 				}
 				console.clear();
 				console.log('남은 지뢰 : ', this.mine_count);
-				console.log(this.map);
+				console.table(this.map);
 				return this.insertInput();
 			} else {
 				console.log('select', input);
@@ -131,7 +131,8 @@ class Game {
 					console.clear();
 					console.log('Fail');
 					console.log('남은 지뢰 : ', this.mine_count);
-					console.log(this.map);
+					console.table(this.map);
+					console.table(this.result_map);
 					const duration = performance.now() - startTime;
 					console.log(duration);
 					process.exit();
@@ -143,12 +144,12 @@ class Game {
 							this.travelArea(x, y);
 							console.clear();
 							console.log('남은 지뢰 : ', this.mine_count);
-							console.log(this.map);
+							console.table(this.map);
 						} else {
 							this.map[y][x] = areaCnt;
 							console.clear();
 							console.log('남은 지뢰 : ', this.mine_count);
-							console.log(this.map);
+							console.table(this.map);
 						}
 					}
 				}
@@ -186,33 +187,37 @@ function gameStart(input: string[], level?: string) {
 	if (level) {
 		input[0] = level;
 	}
-	const size = input[0] === 'easy' ? 5 : input[0] === 'normal' ? 8 : 12;
+	const size_x = input[0] === 'easy' ? 9 : input[0] === 'normal' ? 16 : 30;
+	const size_y = input[0] === 'easy' ? 9 : input[0] === 'normal' ? 16 : 16;
+	const max_mine = input[0] === 'easy' ? 10 : input[0] === 'normal' ? 40 : 99;
 	const levelData: Level = {
 		level: input[0],
-		size: size,
-		max_mine: size * size,
+		size_x,
+		size_y,
+		max_mine,
 	};
 	const game = new Game(levelData);
 	game.initMap();
 	console.clear();
-	console.log(game.map);
+	console.table(game.map);
 	console.log('남은 지뢰 : ', game.mine_count);
 	const result = game.insertInput();
 }
 function rand(min: number, max: number) {
 	return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-function getMineCoord(size: number, mine_count: number): Mine[] {
+function getMineCoord(x: number, y: number, mine_count: number): Mine[] {
 	const mine_set = new Set<Mine>();
 	while (mine_set.size < mine_count) {
 		const mine = {
-			x: rand(0, size - 1),
-			y: rand(0, size - 1),
+			x: rand(0, x - 1),
+			y: rand(0, y - 1),
 		};
 		mine_set.add(mine);
 	}
 	console.log(mine_set);
 	return Array.from(mine_set);
 }
+
 const startTime = performance.now();
 init();

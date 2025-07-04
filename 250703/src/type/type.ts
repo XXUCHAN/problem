@@ -4,6 +4,7 @@ export interface Mine {
 }
 export interface Level {
 	level: string;
-	size: number;
+	size_x: number;
+	size_y: number;
 	max_mine: number;
 }
